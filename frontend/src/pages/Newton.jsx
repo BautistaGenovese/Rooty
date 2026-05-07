@@ -1,0 +1,106 @@
+import { useState } from 'react'
+import { useSettings } from '../hooks/useSettings'
+import { apiPost, buildPayload } from '../utils/api'
+import MethodLayout, { Expander, FormulaInput, PrecisionSlider, EmptyPanel, ResultsPanel, PdfButton } from '../components/MethodLayout'
+
+const COLS = [
+  { key: 'x', label: 'x[i]' }, { key: 'fx', label: "f(x[i])" },
+  { key: 'dfx', label: "f'(x[i])" }, { key: 'x_next', label: 'x[i+1]' },
+  { key: 'error', label: 'Error' },
+]
+
+export default function Newton() {
+  const { settings } = useSettings()
+  const [f, setF] = useState('')
+  const [x0, setX0] = useState(-10)
+  const [prec, setPrec] = useState(2)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  async function calcular() {
+    if (!f.trim()) { setError('Ingresa una función.'); return }
+    setLoading(true); setError(null)
+    try {
+      const data = await apiPost('newton', buildPayload(f, settings, { x_0: x0, err: 10 ** (-prec) }))
+      setResult(data)
+    } catch (e) {
+      setError(e.response?.data?.detail || 'Error al calcular.')
+      setResult(null)
+    } finally { setLoading(false) }
+  }
+
+  const teoria = (
+    <Expander title="📖 ¿Cómo funciona el método de Newton-Raphson?">
+      <p>
+        <strong>Concepto básico:</strong> Comienza en un punto inicial x₀ y traza una línea <strong>tangente</strong> a la curva usando la derivada.
+        La intersección de esa tangente con el eje X da el siguiente punto x₁.
+      </p>
+      <br />
+      <p><strong>Fórmula de iteración:</strong></p>
+      <div style={{ textAlign: 'center', fontSize: '1rem', padding: '8px', fontFamily: 'var(--font-mono)' }}>
+        x_(i+1) = x_i - f(x_i) / f'(x_i)
+      </div>
+      <br />
+      <div className="alert alert-warning">
+        ⚠️ <strong>Restricción:</strong> f'(x_i) ≠ 0, ya que la tangente horizontal nunca cruza el eje X.
+      </div>
+    </Expander>
+  )
+
+  const inputs = (
+    <>
+      <FormulaInput value={f} onChange={setF} />
+      <div className="form-group">
+        <label className="form-label">Ingresar x₀</label>
+        <input className="form-number" type="number" value={x0} step={2} onChange={e => setX0(parseFloat(e.target.value))} />
+      </div>
+      <PrecisionSlider value={prec} onChange={setPrec} />
+      {error && <div className="alert alert-error">{error}</div>}
+      {result && <><hr className="divider" /><PdfButton /></>}
+    </>
+  )
+
+  const resultPanel = result ? (
+    <ResultsPanel
+      f={f} raiz={result.raiz} iteraciones={result.iteraciones}
+      columns={COLS}
+      xMin={result.raiz - 5} xMax={result.raiz + 5}
+      chartKey={`newton-${result.raiz}`}
+    />
+  ) : <EmptyPanel />
+
+  const code = (
+    <pre className="code-block">{`def newton(x_n, f, err):
+    derivada = str(sp.diff(f, 'x'))
+    
+    for i in range(100):
+        fa = evaluar_f(f, x_n)
+        d_val = evaluar_f(derivada, x_n)
+        
+        if d_val == 0:
+            return None
+        
+        x_n1 = x_n - (fa / d_val)
+        
+        if abs(evaluar_f(f, x_n1)) <= 1e-12:
+            return x_n1
+        if abs(x_n1 - x_n) <= err:
+            return x_n1
+        
+        x_n = x_n1
+    return None`}</pre>
+  )
+
+  return (
+    <MethodLayout
+      title="Newton-Raphson"
+      badge="MÉTODO ABIERTO"
+      teoria={teoria}
+      inputs={inputs}
+      onCalcular={loading ? null : calcular}
+      result={resultPanel}
+      codeSnippet={code}
+    />
+  )
+}
