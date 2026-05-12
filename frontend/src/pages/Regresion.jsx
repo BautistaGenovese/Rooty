@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { apiPost } from '../utils/api'
 import Latex from '../components/Latex'
-import MethodLayout, { Expander, EmptyPanel, PdfButton, MetricsBar, IterTable, VSCodeBlock } from '../components/MethodLayout'
+import MethodLayout, { Expander, EmptyPanel, PdfButton, MetricsBar, IterTable, VSCodeBlock, ResultsPanel } from '../components/MethodLayout'
 import Chart from '../components/Chart'
+
+const REG_COLS = [
+  { key: 'x', label: 'X' },
+  { key: 'y', label: 'Y' },
+]
 
 export default function Regresion() {
   const [puntos, setPuntos] = useState([{ x: '', y: '' }, { x: '', y: '' }, { x: '', y: '' }])
@@ -28,8 +33,9 @@ export default function Regresion() {
       setResult({ ...data, xv, yv })
 
       // Build chart data for regression line
-      const xMin = Math.min(...xv) - 1
-      const xMax = Math.max(...xv) + 1
+      const allX = [...xv, data.raiz]
+      const xMin = Math.min(...allX) - 1
+      const xMax = Math.max(...allX) + 1
       const n = 200
       const xs = Array.from({ length: n }, (_, i) => xMin + (i / (n - 1)) * (xMax - xMin))
       const ys = xs.map(xi => data.m * xi + data.b)
@@ -100,37 +106,48 @@ export default function Regresion() {
         </button>
       </div>
       {error && <div className="alert alert-error">{error}</div>}
-      {result && <PdfButton title="Regresión Lineal" params={{ 'Puntos ingresados': result.xv?.length || 0, 'Pendiente (m)': result.m?.toFixed(4), 'Ordenada (b)': result.b?.toFixed(4), 'R²': result.r2?.toFixed(4) }} result={result} />}
+      {result && (
+        <PdfButton 
+          title="Regresión Lineal" 
+          params={{ 
+            'Puntos ingresados': result.xv?.length || 0, 
+            'Pendiente (m)': result.m?.toFixed(4), 
+            'Ordenada (b)': result.b?.toFixed(4), 
+            'R²': result.r2?.toFixed(4) 
+          }} 
+          result={{
+            ...result,
+            iteraciones: result.xv.map((x, i) => ({ x, y: result.yv[i] }))
+          }} 
+          columns={REG_COLS}
+          chartId="chart-container"
+        />
+      )}
     </>
   )
 
   const resultPanel = result && chartData ? (
-    <div>
-      <div style={{ textAlign: 'center', marginBottom: '8px' }}>
-        <span style={{ fontSize: '0.7rem', color: 'var(--slate)', fontWeight: 700, letterSpacing: 1.2, display: 'block', opacity: 0.8 }}>
-          FUNCIÓN APROXIMADA
-        </span>
-        <div style={{ color: 'var(--navy)', marginTop: '-2px' }}>
-          <Latex tex={`${result.m.toFixed(4)}x + ${result.b >= 0 ? result.b.toFixed(4) : `(${result.b.toFixed(4)})`}`} display />
+    <ResultsPanel
+      isRegresion
+      regresionChart={chartData}
+      raiz={result.raiz}
+      xMin={Math.min(...result.xv, result.raiz) - 1}
+      xMax={Math.max(...result.xv, result.raiz) + 1}
+      chartKey={`reg-${result.raiz}`}
+      extraMetrics={
+        <div className="metrics-bar">
+          <div className="metric-item">
+            <div className="metric-label">Raíz encontrada</div>
+            <div className="metric-value" style={{ fontSize: '1.1rem' }}>{result.raiz?.toFixed(10)}</div>
+          </div>
         </div>
-      </div>
+      }
+      dataPoints={result.xv.map((x, i) => ({ x, y: result.yv[i] }))}
+    />
+  ) : <EmptyPanel />
 
-      <div className="metrics-bar">
-        <div className="metric-item">
-          <div className="metric-label">Raíz encontrada</div>
-          <div className="metric-value" style={{ fontSize: '1.1rem' }}>{result.raiz?.toFixed(10)}</div>
-        </div>
-      </div>
-
-      <Chart
-        f={chartData} raiz={result.raiz}
-        xMin={Math.min(...result.xv) - 1}
-        xMax={Math.max(...result.xv) + 1}
-        iteraciones={{ puntos: result.puntos }}
-        chartKey={`reg-${result.raiz}`}
-        isRegresion
-      />
-
+  const extra = result ? (
+    <div className="no-pdf" style={{ marginTop: '1.5rem' }}>
       <Expander title="📊 Ver métricas del modelo">
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.88rem', lineHeight: 2 }}>
           <div><strong>Raíz (x):</strong> {result.raiz}</div>
@@ -140,7 +157,7 @@ export default function Regresion() {
         </div>
       </Expander>
     </div>
-  ) : <EmptyPanel />
+  ) : null
 
   const code = `def calcular_regresion(datos):
     m, b = statistics.linear_regression(
@@ -161,6 +178,7 @@ export default function Regresion() {
       onCalcular={loading ? null : calcular}
       result={resultPanel}
       codeRaw={code}
+      extra={extra}
     />
   )
 }

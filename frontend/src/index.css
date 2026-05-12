@@ -715,8 +715,8 @@ tbody td { padding: 6px 12px; text-align: center; color: var(--navy-dark); white
 .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
 
 /* ─── TWO-COLUMN LAYOUT ───────────────────────────────────── */
-.two-col { display: grid; grid-template-columns: 1fr 1.4fr; gap: 1.5rem; align-items: stretch; }
-.two-col-equal { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: stretch; }
+.two-col { display: grid; grid-template-columns: 1fr 1.4fr; gap: 1.5rem; align-items: start; }
+.two-col-equal { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
 .input-col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
 /* ─── METRICS BAR ─────────────────────────────────────────── */

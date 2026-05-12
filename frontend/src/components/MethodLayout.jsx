@@ -20,6 +20,15 @@ export function formatMathToLatex(f) {
   return tex;
 }
 
+function sanitizeSubscripts(str) {
+  if (!str) return '';
+  const map = {
+    '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9',
+    '₊': '+', '₋': '-', '₌': '=', '₍': '(', '₎': ')', 'ₙ': 'n', 'ᵢ': 'i', 'ⱼ': 'j', 'ₖ': 'k'
+  };
+  return str.split('').map(char => map[char] || char).join('');
+}
+
 export function Expander({ title, children, className = '', badge = null }) {
   const [open, setOpen] = useState(false)
   return (
@@ -255,7 +264,12 @@ export function PdfButton({ title, f, params, result, columns }) {
       }
       
       if (params) {
-        const paramStr = Object.entries(params).map(([k,v]) => `${k}: ${v}`).join(', ');
+        const paramStr = Object.entries(params)
+          .map(([k,v]) => `${sanitizeSubscripts(k)}: ${v}`)
+          .join(', ');
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30, 41, 59);
         doc.text(`Parámetros: ${paramStr}`, 14, y);
         y += 8;
       }
@@ -272,13 +286,26 @@ export function PdfButton({ title, f, params, result, columns }) {
       // Chart
       const chartEl = document.getElementById('chart-pdf-container');
       if (chartEl) {
-        const canvas = await html2canvas(chartEl, { scale: 2 });
+        const canvas = await html2canvas(chartEl, { 
+          scale: 3, 
+          useCORS: true,
+          logging: false 
+        });
         const imgData = canvas.toDataURL('image/png');
         const imgProps = doc.getImageProperties(imgData);
-        const pdfWidth = pw - 28;
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        doc.addImage(imgData, 'PNG', 14, y, pdfWidth, pdfHeight);
-        y += pdfHeight + 10;
+        
+        let displayWidth = pw - 28;
+        let displayHeight = (imgProps.height * displayWidth) / imgProps.width;
+        
+        // Cap height to 110mm (more generous than 85mm to avoid "tiny" charts on mobile)
+        if (displayHeight > 110) {
+          displayHeight = 110;
+          displayWidth = (imgProps.width * displayHeight) / imgProps.height;
+        }
+        
+        const xOffset = (pw - displayWidth) / 2;
+        doc.addImage(imgData, 'PNG', xOffset, y, displayWidth, displayHeight);
+        y += displayHeight + 10;
       }
 
       // Table
@@ -325,6 +352,7 @@ export function ResultsPanel({
   isPuntoFijo = false, isRegresion = false,
   regresionChart = null, regresionData = null,
   extraMetrics = null,
+  dataPoints = null,
 }) {
   const [chartData, setChartData] = useState(null)
   const { settings } = useSettings()
@@ -362,6 +390,7 @@ export function ResultsPanel({
             chartKey={chartKey}
             isPuntoFijo={isPuntoFijo}
             isRegresion={isRegresion}
+            dataPoints={dataPoints}
           />
         </div>
       </div>
@@ -370,7 +399,7 @@ export function ResultsPanel({
 }
 
 // ─── METHOD PAGE LAYOUT ───────────────────────────────────────────────────────
-export default function MethodLayout({ title, badge, teoria, inputs, onCalcular, result, codeRaw, iteraciones, columns }) {
+export default function MethodLayout({ title, badge, teoria, inputs, onCalcular, result, codeRaw, iteraciones, columns, extra }) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -402,7 +431,7 @@ export default function MethodLayout({ title, badge, teoria, inputs, onCalcular,
             {inputs}
           </div>
 
-          <div style={{ marginTop: 'auto', paddingTop: '1.5rem' }}>
+          <div style={{ paddingTop: '1.5rem' }}>
             <button className="btn btn-primary no-pdf" onClick={onCalcular}>
               🚀 Calcular y Graficar
             </button>
@@ -414,6 +443,8 @@ export default function MethodLayout({ title, badge, teoria, inputs, onCalcular,
           {result}
         </div>
       </div>
+
+      {extra}
 
       {/* ITERATION TABLE — outside the cards, full width */}
       {iteraciones && iteraciones.length > 0 && (

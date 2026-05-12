@@ -31,7 +31,7 @@ const C = {
   iter: "var(--error)"
 };
 
-export default function Chart({ f, raiz, xMin, xMax, isPuntoFijo = false, isRegresion = false }) {
+export default function Chart({ f, raiz, xMin, xMax, isPuntoFijo = false, isRegresion = false, dataPoints = null }) {
   const [containerEl, setContainerEl] = useState(null);
   const [dimensions, setDimensions] = useState({ W: 800 });
   const [isRootHovered, setIsRootHovered] = useState(false);
@@ -74,7 +74,7 @@ export default function Chart({ f, raiz, xMin, xMax, isPuntoFijo = false, isRegr
     let centerX = (origXL + origXR) / 2;
     let centerY = 0;
 
-    if (raiz != null && Number.isFinite(raiz)) {
+    if (raiz != null && Number.isFinite(raiz) && !isRegresion) {
         centerX = raiz;
         centerY = isPuntoFijo ? raiz : 0;
     }
@@ -174,7 +174,9 @@ export default function Chart({ f, raiz, xMin, xMax, isPuntoFijo = false, isRegr
   return (
     <div style={{ width: "100%", userSelect: "none" }}>
       {/* ZOOM CONTROLS */}
-      <div style={{ 
+      <div 
+        data-html2canvas-ignore="true"
+        style={{ 
         display: 'grid', 
         gridTemplateColumns: '1fr auto 1fr', 
         alignItems: 'center', 
@@ -336,6 +338,11 @@ export default function Chart({ f, raiz, xMin, xMax, isPuntoFijo = false, isRegr
         <g clipPath="url(#chart-clip)">
           <path d={curveD} fill="none" stroke={C.teal} strokeWidth={2.5} strokeLinejoin="round" />
         </g>
+        
+        {/* Puntos de datos para Regresión */}
+        {isRegresion && dataPoints && dataPoints.map((p, i) => (
+          <circle key={i} cx={cx(p.x)} cy={cy(p.y)} r={4} fill={C.teal} stroke="white" strokeWidth={1.5} />
+        ))}
 
         {/* Punto de Raíz */}
         {rootX && (
