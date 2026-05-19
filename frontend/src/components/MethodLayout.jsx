@@ -38,7 +38,7 @@ export function Expander({ title, children, className = '', badge = null }) {
         <span>{title}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           {badge && (
-            <span className="badge" style={{ fontSize: '0.68rem', letterSpacing: '0.06em' }}>{badge}</span>
+            <span className="history-param-chip" style={{ fontSize: '0.68rem', letterSpacing: '0.06em' }}>{badge}</span>
           )}
           <span className={`expander-arrow ${open ? 'open' : ''}`}>▼</span>
         </div>
@@ -425,7 +425,7 @@ export default function MethodLayout({ title, badge, teoria, inputs, onCalcular,
         <div className="card">
           <div className="card-header">
             <h4>Parámetros</h4>
-            <span className="badge">{badge}</span>
+            <span className="history-param-chip">{badge}</span>
           </div>
 
           <div>

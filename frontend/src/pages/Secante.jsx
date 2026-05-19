@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useSettings } from '../hooks/useSettings'
+import { useHistory } from '../hooks/useHistory'
 import { apiPost, buildPayload } from '../utils/api'
 import Latex from '../components/Latex'
 import MethodLayout, { Expander, FormulaInput, PrecisionSlider, EmptyPanel, ResultsPanel, PdfButton, VSCodeBlock, CompareButton } from '../components/MethodLayout'
@@ -13,6 +14,7 @@ const COLS = [
 
 export default function Secante() {
   const { settings } = useSettings()
+  const { push: pushHistory } = useHistory()
   const [searchParams] = useSearchParams()
   const [f, setF] = useState('')
   const [xn, setXn] = useState(-10)
@@ -35,8 +37,14 @@ export default function Secante() {
     if (!f.trim()) { setError('Ingresa una función.'); return }
     setLoading(true); setError(null)
     try {
-      const data = await apiPost('secante', buildPayload(f, settings, { x_n: xn, x_n1: xn1, err: 10 ** (-prec) }))
+      const data = await apiPost('secante', buildPayload({ f, x_n: xn, x_n1: xn1, err: 10 ** (-prec) }, settings))
       setResult(data)
+      pushHistory({
+        method: 'Secante',
+        displayParams: { 'f(x)': f, 'xₙ': xn, 'xₙ₊₁': xn1, 'Tolerancia': `1e-${prec}` },
+        queryParams: { f, xn, xn1 },
+        raiz: data.raiz,
+      })
     } catch (e) {
       setError(e.response?.data?.detail || 'Error al calcular.')
       setResult(null)

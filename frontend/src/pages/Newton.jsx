@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useSettings } from '../hooks/useSettings'
+import { useHistory } from '../hooks/useHistory'
 import { apiPost, buildPayload } from '../utils/api'
 import Latex from '../components/Latex'
 import MethodLayout, { Expander, FormulaInput, PrecisionSlider, EmptyPanel, ResultsPanel, PdfButton, VSCodeBlock, CompareButton } from '../components/MethodLayout'
@@ -13,6 +14,7 @@ const COLS = [
 
 export default function Newton() {
   const { settings } = useSettings()
+  const { push: pushHistory } = useHistory()
   const [searchParams] = useSearchParams()
   const [f, setF] = useState('')
   const [x0, setX0] = useState(-10)
@@ -32,8 +34,14 @@ export default function Newton() {
     if (!f.trim()) { setError('Ingresa una función.'); return }
     setLoading(true); setError(null)
     try {
-      const data = await apiPost('newton', buildPayload(f, settings, { x_0: x0, err: 10 ** (-prec) }))
+      const data = await apiPost('newton', buildPayload({ f, x_0: x0, err: 10 ** (-prec) }, settings))
       setResult({ ...data, usedF: f })
+      pushHistory({
+        method: 'Newton-Raphson',
+        displayParams: { 'f(x)': f, 'x₀': x0, 'Tolerancia': `1e-${prec}` },
+        queryParams: { f, x0 },
+        raiz: data.raiz,
+      })
     } catch (e) {
       setError(e.response?.data?.detail || 'Error al calcular.')
       setResult(null)
@@ -68,7 +76,7 @@ export default function Newton() {
       {result && (
         <>
           <PdfButton title="Newton-Raphson" f={f} params={{ 'x0': x0, 'Tolerancia': `1e-${prec}` }} result={result} columns={COLS} />
-          <CompareButton f={f} prec={prec} metA="Newton" paramsA={{ x_0: x0 }} />
+          <CompareButton f={f} prec={prec} metA="Newton-Raphson" paramsA={{ x_0: x0 }} />
         </>
       )}
     </>

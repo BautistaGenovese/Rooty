@@ -7,16 +7,14 @@ export async function apiPost(endpoint, data) {
   return res.data
 }
 
-export function buildPayload(f, settings, extra = {}) {
+export function buildPayload(payload, settings) {
   return {
-    f,
-    err: extra.err ?? 1e-2,
     max_iters: settings.maxIters,
     cero_maquina: settings.ceroMaquina,
     limite_infinito: settings.limiteInfinito,
     tipo_error: settings.tipoError,
     trig_mode: settings.trigMode,
-    ...extra,
+    ...payload,
   }
 }
 

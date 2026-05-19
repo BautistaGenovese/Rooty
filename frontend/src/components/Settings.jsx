@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSettings } from '../hooks/useSettings'
+import { IconSettings } from './Icons'
 
 const CERO_OPT = [1e-6, 1e-9, 1e-12, 1e-15]
 const INF_OPT = [1e6, 1e15, 1e50, 1e100]
@@ -60,13 +61,14 @@ export default function Settings() {
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button className="settings-btn" onClick={() => setOpen(o => !o)}>
-        ⚙️ Configuración Global
+      <button className="utility-btn" onClick={() => setOpen(o => !o)}>
+        <span className="util-icon"><IconSettings /></span>
+        <span>Configuración global</span>
       </button>
 
       {open && (
         <div className="settings-panel">
-          <h3>🛠️ Configuración Global</h3>
+          <h3 style={{ display: 'flex', alignItems: 'center' }}><IconSettings style={{ width: '1.2rem', height: '1.2rem', marginRight: '6px' }}/> Configuración Global</h3>
           <hr className="divider" />
 
           <p style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 8 }}>🎨 Apariencia</p>

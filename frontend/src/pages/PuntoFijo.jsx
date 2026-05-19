@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useSettings } from '../hooks/useSettings'
+import { useHistory } from '../hooks/useHistory'
 import { apiPost, buildPayload } from '../utils/api'
 import Latex from '../components/Latex'
 import MethodLayout, { Expander, FormulaInput, PrecisionSlider, EmptyPanel, ResultsPanel, PdfButton, VSCodeBlock, CompareButton } from '../components/MethodLayout'
@@ -11,6 +12,7 @@ const COLS = [
 
 export default function PuntoFijo() {
   const { settings } = useSettings()
+  const { push: pushHistory } = useHistory()
   const [searchParams] = useSearchParams()
   const [mode, setMode] = useState('manual') // 'manual' | 'auto'
   const [g, setG] = useState('')
@@ -34,8 +36,14 @@ export default function PuntoFijo() {
     if (!formula.trim()) { setError('Ingresa una función.'); return }
     setLoading(true); setError(null)
     try {
-      const data = await apiPost('punto_fijo', buildPayload(formula, settings, { x_0: x0, err: 10 ** (-prec) }))
+      const data = await apiPost('punto_fijo', buildPayload({ f: formula, x_0: x0, err: 10 ** (-prec) }, settings))
       setResult(data)
+      pushHistory({
+        method: 'Punto Fijo',
+        displayParams: { 'g(x)': formula, 'x₀': x0, 'Tolerancia': `1e-${prec}` },
+        queryParams: { g: formula, x0 },
+        raiz: data.raiz,
+      })
     } catch (e) {
       setError(e.response?.data?.detail || 'Error al calcular.')
       setResult(null)

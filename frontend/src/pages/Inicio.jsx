@@ -1,4 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { 
+  IconBiseccion, IconRegulaFalsi, IconNewton, IconSecante, 
+  IconPuntoFijo, IconRegresion, IconComparacion 
+} from '../components/Icons'
 
 export default function Inicio() {
   const navigate = useNavigate()
@@ -101,8 +105,8 @@ export default function Inicio() {
           Ellos te cobran la suscripción PRO para ver el 'paso a paso'. Roooty te da la tabla de iteraciones completa y el error de forma <strong>totalmente gratis</strong>.
         </div>
         <div className="feature-card green">
-          <h4>🎯 Aritmética finita</h4>
-          No permitimos errores mágicos. Simula aritmética finita (truncamiento) y maneja el número de cifras significativas (K) a tu gusto.
+          <h4>📊 Comparativa Multimétodo</h4>
+          Evalúa el rendimiento de distintos algoritmos en paralelo. Compara iteraciones, errores y velocidad de convergencia en una sola pantalla.
         </div>
         <div className="feature-card yellow">
           <h4>📄 Reportes Académicos</h4>
@@ -129,7 +133,7 @@ export default function Inicio() {
           <tbody>
             {[
               ['Pasos de iteración', 'Pago (Pro)', 'Limitado / Manual', 'Gratis & Ilimitado'],
-              ['Aritmética Finita', 'Automático', 'Estándar Rígido', 'Configurable (K bits)'],
+              ['Análisis Comparativo', 'Uno por vez', 'Armado manual tedioso', 'En paralelo y visual'],
               ['Exportación Directa', 'Solo imagen', 'Manual / Formatos fijos', 'PDF Dinámico'],
             ].map(([feat, wa, ex, rt]) => (
               <tr key={feat}>
@@ -159,12 +163,12 @@ export default function Inicio() {
         <Link to="/biseccion" style={{ textDecoration: 'none' }}>
           <div className="method-guide-card">
             <div className="method-guide-header">
-              <strong>Bisección</strong>
-              <span className="badge">Garantiza convergencia</span>
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><IconBiseccion size={18} /> Bisección</strong>
+              <span className="history-param-chip">Garantiza convergencia</span>
             </div>
             <p className="method-guide-desc">Divide el intervalo a la mitad en cada paso. Lento pero <strong>siempre converge</strong> si hay un cambio de signo.</p>
             <div className="method-guide-when">
-              <span className="method-when-label">Ideal cuando:</span>
+              <span className="method-when-label">✅ Ideal cuando:</span>
               <ul>
                 <li>La función es continua pero complicada de derivar</li>
                 <li>Necesitás una respuesta garantizada sin importar la velocidad</li>
@@ -185,8 +189,8 @@ export default function Inicio() {
         <Link to="/regula-falsi" style={{ textDecoration: 'none' }}>
           <div className="method-guide-card">
             <div className="method-guide-header">
-              <strong>Regula Falsi</strong>
-              <span className="badge">Más rápido que Bisección</span>
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><IconRegulaFalsi size={18} /> Regula Falsi</strong>
+              <span className="history-param-chip">Más rápido que Bisección</span>
             </div>
             <p className="method-guide-desc">Usa una línea secante en vez de la mitad exacta. Converge más rápido que bisección, pero puede ser lento en algunos casos.</p>
             <div className="method-guide-when">
@@ -215,8 +219,8 @@ export default function Inicio() {
         <Link to="/newton" style={{ textDecoration: 'none' }}>
           <div className="method-guide-card">
             <div className="method-guide-header">
-              <strong>Newton-Raphson</strong>
-              <span className="badge">Convergencia cuadrática</span>
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><IconNewton size={18} /> Newton-Raphson</strong>
+              <span className="history-param-chip">Convergencia cuadrática</span>
             </div>
             <p className="method-guide-desc">Usa la derivada para aproximarse a la raíz en muy pocas iteraciones. El más <strong>rápido de todos</strong>, cuando converge.</p>
             <div className="method-guide-when">
@@ -241,16 +245,16 @@ export default function Inicio() {
         <Link to="/secante" style={{ textDecoration: 'none' }}>
           <div className="method-guide-card">
             <div className="method-guide-header">
-              <strong>Secante</strong>
-              <span className="badge">Sin derivada analítica</span>
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><IconSecante size={18} /> Secante</strong>
+              <span className="history-param-chip">Sin derivada analítica</span>
             </div>
-            <p className="method-guide-desc">Variante de Newton que usa dos puntos para aproximar la derivada. Casi tan rápido, pero sin necesitar derivar.</p>
+            <p className="method-guide-desc">Variante de Newton-Raphson que usa dos puntos para aproximar la derivada. Casi tan rápido, pero sin necesitar derivar.</p>
             <div className="method-guide-when">
               <span className="method-when-label">✅ Ideal cuando:</span>
               <ul>
                 <li>La derivada es difícil de calcular a mano</li>
                 <li>La función viene de datos experimentales (sin fórmula exacta)</li>
-                <li>Querés velocidad de Newton sin el costo de derivar</li>
+                <li>Querés velocidad de Newton-Raphson sin el costo de derivar</li>
               </ul>
             </div>
             <div className="method-guide-example">
@@ -267,8 +271,8 @@ export default function Inicio() {
         <Link to="/punto-fijo" style={{ textDecoration: 'none' }}>
           <div className="method-guide-card">
             <div className="method-guide-header">
-              <strong>Punto Fijo</strong>
-              <span className="badge">Convergencia condicional</span>
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><IconPuntoFijo size={18} /> Punto Fijo</strong>
+              <span className="history-param-chip">Convergencia condicional</span>
             </div>
             <p className="method-guide-desc">Reformula f(x)=0 como x=g(x) e itera. Converge solo si |g'(x)| &lt; 1 cerca de la raíz.</p>
             <div className="method-guide-when">
@@ -297,8 +301,8 @@ export default function Inicio() {
         <Link to="/regresion" style={{ textDecoration: 'none' }}>
           <div className="method-guide-card method-guide-card--highlight">
             <div className="method-guide-header">
-              <strong>Regresión Lineal</strong>
-              <span className="badge badge-purple">Modelado de datos</span>
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><IconRegresion size={18} /> Regresión Lineal</strong>
+              <span className="history-param-chip">Modelado de datos</span>
             </div>
             <p className="method-guide-desc">Ajusta una línea a un conjunto de datos usando mínimos cuadrados. Calcula pendiente, ordenada y R².</p>
             <div className="method-guide-when">
@@ -319,8 +323,8 @@ export default function Inicio() {
         <Link to="/comparacion" style={{ textDecoration: 'none' }}>
           <div className="method-guide-card" style={{ borderStyle: 'dashed', borderColor: 'var(--blue)' }}>
             <div className="method-guide-header">
-              <strong style={{ color: 'var(--blue)' }}>Comparación de Métodos</strong>
-              <span className="badge">Multi-método</span>
+              <strong style={{ color: 'var(--blue)', display: 'flex', alignItems: 'center', gap: '6px' }}><IconComparacion size={18} /> Comparación de Métodos</strong>
+              <span className="history-param-chip">Multi-método</span>
             </div>
             <p className="method-guide-desc">Ejecuta múltiples métodos sobre la misma función y compará iteraciones, error y velocidad de convergencia en paralelo.</p>
             <div className="method-guide-when">
@@ -333,7 +337,7 @@ export default function Inicio() {
             </div>
             <div className="method-guide-example">
               <span className="method-ex-label">📌 Ejemplo típico:</span>
-              Comparar Bisección vs. Newton en <code>f(x) = x³ - 2x - 5</code>
+              Comparar Bisección vs. Newton-Raphson en <code>f(x) = x³ - 2x - 5</code>
             </div>
           </div>
         </Link>

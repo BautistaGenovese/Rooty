@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useSettings } from '../hooks/useSettings'
+import { useHistory } from '../hooks/useHistory'
 import { apiPost, buildPayload } from '../utils/api'
 import Latex from '../components/Latex'
 import MethodLayout, { Expander, FormulaInput, PrecisionSlider, EmptyPanel, ResultsPanel, PdfButton, VSCodeBlock, CompareButton } from '../components/MethodLayout'
@@ -13,6 +14,7 @@ const COLS = [
 
 export default function RegulaFalsi() {
   const { settings } = useSettings()
+  const { push: pushHistory } = useHistory()
   const [searchParams] = useSearchParams()
   const [f, setF] = useState('')
   const [a, setA] = useState(-10)
@@ -35,8 +37,14 @@ export default function RegulaFalsi() {
     if (!f.trim()) { setError('Ingresa una función.'); return }
     setLoading(true); setError(null)
     try {
-      const data = await apiPost('regula_falsi', buildPayload(f, settings, { a, b, err: 10 ** (-prec) }))
+      const data = await apiPost('regula_falsi', buildPayload({ f, a, b, err: 10 ** (-prec) }, settings))
       setResult({ ...data, usedF: f, usedA: a, usedB: b })
+      pushHistory({
+        method: 'Regula Falsi',
+        displayParams: { 'f(x)': f, a, b, 'Tolerancia': `1e-${prec}` },
+        queryParams: { f, a, b },
+        raiz: data.raiz,
+      })
     } catch (e) {
       setError(e.response?.data?.detail || 'Error al calcular.')
       setResult(null)

@@ -6,9 +6,9 @@ import { Expander, FormulaInput, PrecisionSlider, IterTable, formatMathToLatex }
 import Chart, { ErrorChart, RadarChart2, ComparisonBarChart } from '../components/Chart'
 import Latex from '../components/Latex'
 
-const METODOS = ['Bisección', 'Regula Falsi', 'Newton', 'Secante', 'Punto Fijo']
+const METODOS = ['Bisección', 'Regula Falsi', 'Newton-Raphson', 'Secante', 'Punto Fijo']
 
-const ROB = { 'Bisección': 10, 'Regula Falsi': 7, 'Secante': 6.5, 'Newton': 4, 'Punto Fijo': 5 }
+const ROB = { 'Bisección': 10, 'Regula Falsi': 7, 'Secante': 6.5, 'Newton-Raphson': 4, 'Punto Fijo': 5 }
 
 
 
@@ -63,11 +63,11 @@ function VerdictCard({ metA, metB, itA, itB, t1, t2, cA, cB, rA, rB }) {
 }
 
 function buildReq(nombre, f, prec, settings, params) {
-  const base = buildPayload(f, settings, { err: 10 ** (-prec), ...params })
+  const base = buildPayload({ f, err: 10 ** (-prec), ...params }, settings)
   const map = {
     'Bisección': 'biseccion',
     'Regula Falsi': 'regula_falsi',
-    'Newton': 'newton',
+    'Newton-Raphson': 'newton',
     'Secante': 'secante',
     'Punto Fijo': 'punto_fijo',
   }
@@ -94,7 +94,7 @@ function ParamsFor({ nombre, id, params, onChange }) {
     )
   }
 
-  if (nombre === 'Newton' || nombre === 'Punto Fijo') {
+  if (nombre === 'Newton-Raphson' || nombre === 'Punto Fijo') {
     return (
       <div className="form-group" style={{ marginTop: 8 }}>
         <label className="form-label">Punto inicial x₀</label>
@@ -221,8 +221,8 @@ export default function Comparacion() {
 
   const itA = result?.rA?.iteraciones ?? []
   const itB = result?.rB?.iteraciones ?? []
-  const cA = Math.max(1, metA === 'Newton' ? 2 * itA.length : 2 + itA.length)
-  const cB = Math.max(1, metB === 'Newton' ? 2 * itB.length : 2 + itB.length)
+  const cA = Math.max(1, metA === 'Newton-Raphson' ? 2 * itA.length : 2 + itA.length)
+  const cB = Math.max(1, metB === 'Newton-Raphson' ? 2 * itB.length : 2 + itB.length)
 
   const t1_safe = Math.max(0.001, result?.t1 ?? 1)
   const t2_safe = Math.max(0.001, result?.t2 ?? 1)
